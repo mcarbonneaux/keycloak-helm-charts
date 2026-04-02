@@ -1,89 +1,216 @@
-<!-- markdownlint-disable MD041 -->
-<p align="center">
-    <img width="400px" height=auto src="https://dyltqmyl993wv.cloudfront.net/bitnami/bitnami-by-vmware.png" />
-</p>
+> **Note**: This project is a fork of the [Bitnami Keycloak Helm chart](https://github.com/bitnami/charts/tree/main/bitnami/keycloak) - AI assisted
 
-<p align="center">
-    <a href="https://twitter.com/bitnami"><img src="https://badgen.net/badge/twitter/@bitnami/1DA1F2?icon&label" /></a>
-    <a href="https://github.com/bitnami/charts"><img src="https://badgen.net/github/stars/bitnami/charts?icon=github" /></a>
-    <a href="https://github.com/bitnami/charts"><img src="https://badgen.net/github/forks/bitnami/charts?icon=github" /></a>
-    <a href="https://artifacthub.io/packages/search?repo=bitnami"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/bitnami" /></a>
-</p>
+# [Keycloak](https://www.keycloak.org/) Helm chart
 
-# The Bitnami Library for Kubernetes
+Keycloak is a high-performance, Java-based open-source Identity and Access Management (IAM) solution. It allows developers to add a robust authentication layer to their applications with minimal effort, supporting industry-standard protocols such as **OpenID Connect (OIDC)**, **SAML 2.0**, and **OAuth 2.0**.
 
-Popular applications, provided by [Bitnami](https://bitnami.com), ready to launch on Kubernetes using [Kubernetes Helm](https://github.com/helm/helm).
+This Helm chart enables the deployment of Keycloak on a [Kubernetes](https://kubernetes.io) cluster in a highly available and production-optimized manner. Unlike standard deployments, this chart focuses on a **Cloud-Native** architecture, prioritizing statelessness, external databases, and advanced observability.
 
-## TL;DR
+### Deployment Highlights:
+- 🔐 **Enhanced Security**: Native Zero-Trust support and secret isolation.
+- 🚀 **Maximum Scalability**: "Clusterless" mode for horizontal scaling without the complexity of JGroups in the Cloud.
+- 📊 **Native Observability**: Deep integration with OpenTelemetry, Prometheus, and logs in ECS (Elastic Common Schema) format.
+- 🌍 **Multi-Site & Geo-Redundancy**: Session sharing capabilities across multiple regions or datacenters via external Infinispan.
 
-```console
-helm install my-release oci://registry-1.docker.io/bitnamicharts/<chart>
-```
+## Table of Contents
 
-## Why use Bitnami Secure Images?
+- [Installation & Quick Start](#installation--quick-start)
+- [Fork Overview](#fork-overview)
+- [Architecture](#architecture)
+- [Chart internal descriptions](docs/architecture.md)
+- [Database & Images](docs/config-database.md)
+- [Realms & Config-CLI](docs/config-realms.md)
+- [Networking & TLS](docs/config-networking.md)
+- [Cache & Clusters](docs/config-cache.md)
+- [Observability & Logs](docs/config-observability.md)
+- [Operations Guide](docs/config-operations.md)
+- [Parameters Reference](docs/parameters.md)
+- [Troubleshooting & Upgrading](#troubleshooting--upgrading)
+- [License](#license)
 
-Those are hardened, minimal CVE images built and maintained by Bitnami. Bitnami Secure Images are based on the cloud-optimized, security-hardened enterprise [OS Photon Linux](https://vmware.github.io/photon/). Why choose BSI images?
-
-- Hardened secure images of popular open source software with Near-Zero Vulnerabilities
-- Vulnerability Triage & Prioritization with VEX Statements, KEV and EPSS Scores
-- Compliance focus with FIPS, STIG, and air-gap options, including secure bill of materials (SBOM)
-- Software supply chain provenance attestation through in-toto
-- First class support for the internet’s favorite Helm charts
-
-Each image comes with valuable security metadata. You can view the metadata in [our public catalog here](https://app-catalog.vmware.com/bitnami/apps). Note: Some data is only available with [commercial subscriptions to BSI](https://bitnami.com/).
-
-![Alt text](https://github.com/bitnami/containers/blob/main/BSI%20UI%201.png?raw=true "Application details")
-![Alt text](https://github.com/bitnami/containers/blob/main/BSI%20UI%202.png?raw=true "Packaging report")
-
-If you are looking for our previous generation of images based on Debian Linux, please see the [Bitnami Legacy registry](https://hub.docker.com/u/bitnamilegacy).
-
-## Vulnerabilities scanner
-
-Each Helm chart contains one or more containers. Those containers use images provided by Bitnami through its test & release pipeline and whose source code can be found at [bitnami/containers](https://github.com/bitnami/containers).
-
-As part of the container releases, the images are scanned for vulnerabilities, [here](https://github.com/bitnami/containers#vulnerability-scan-in-bitnami-container-images) you can find more info about this topic.
-
-Since the container image is an immutable artifact that is already analyzed, as part of the Helm chart release process we are not looking for vulnerabilities in the containers but running different verifications to ensure the Helm charts work as expected, see the testing strategy defined at [_TESTING.md_](https://github.com/bitnami/charts/blob/main/TESTING.md).
-
-## Before you begin
+## Installation & Quick Start
 
 ### Prerequisites
 
 - Kubernetes 1.23+
 - Helm 3.8.0+
+- **Keycloak 26.0.0+** (This chart is optimized for Keycloak 26+ and its Quarkus distribution)
 
-### Setup a Kubernetes Cluster
+### Installing the Chart
 
-The quickest way to set up a Kubernetes cluster to install Bitnami Charts is by following the "Bitnami Get Started" guides for the different services:
+To install the chart using the OCI registry:
 
-- [Get Started with Bitnami Charts using VMware Tanzu Kubernetes Grid (TKG)](https://docs.bitnami.com/kubernetes/get-started-tkg/)
-- [Get Started with Bitnami Charts using VMware Tanzu Mission Control (TMC)](https://docs.bitnami.com/kubernetes/get-started-tmc/)
-- [Get Started With Bitnami Charts Using Azure Marketplace Kubernetes Applications](https://docs.bitnami.com/kubernetes/get-started-cnab/)
-- [Get Started with Bitnami Charts using the Amazon Elastic Container Service for Kubernetes (EKS)](https://docs.bitnami.com/kubernetes/get-started-eks/)
-- [Get Started with Bitnami Charts using the Google Kubernetes Engine (GKE)](https://docs.bitnami.com/kubernetes/get-started-gke/)
+```console
+helm install my-release oci://ghcr.io/mcarbonneaux/charts/keycloak --version latest --set dbHost=mypostgresql
+```
 
-For setting up Kubernetes on other cloud platforms or bare-metal servers refer to the Kubernetes [getting started guide](https://kubernetes.io/docs/getting-started-guides/).
+> **Note**: Replace `mcarbonneaux` with the appropriate GitHub username/organization. The version used in the command must match an existing Git tag published to the registry.
 
-### Install Helm
+Alternatively, to install from the local directory:
 
-Helm is a tool for managing Kubernetes charts. Charts are packages of pre-configured Kubernetes resources.
+```console
+helm install my-release . --set dbHost=mypostgresql
+```
 
-To install Helm, refer to the [Helm install guide](https://github.com/helm/helm#install) and ensure that the `helm` binary is in the `PATH` of your shell.
+### Releasing the Chart (Maintenance)
 
-### Using Helm
+This chart is automatically packaged and pushed to the OCI registry when a Git tag starting with `v` is pushed to the repository:
 
-Once you have installed the Helm client, you can deploy a Bitnami Helm Chart into a Kubernetes cluster.
+1. Update `version` and `appVersion` in `Chart.yaml`.
+2. Commit and push your changes.
+3. Create and push a new tag:
+   ```console
+   git tag v1.0.6
+   git push origin v1.0.6
+   ```
+4. The GitHub Action will trigger and release the new version to GHCR.
 
-Please refer to the [Quick Start guide](https://helm.sh/docs/intro/quickstart/) if you wish to get running in just a few commands, otherwise, the [Using Helm Guide](https://helm.sh/docs/intro/using_helm/) provides detailed instructions on how to use the Helm client to manage packages on your Kubernetes cluster.
+These commands deploy a Keycloak application on the Kubernetes cluster in the default configuration.
 
-Useful Helm Client Commands:
+> **Tip**: List all releases using `helm list`
 
-- Install a chart: `helm install my-release oci://registry-1.docker.io/bitnamicharts/<chart>`
-- Upgrade your application: `helm upgrade my-release oci://registry-1.docker.io/bitnamicharts/<chart>`
+For detailed configuration options, please refer to the [Configuration Guide](docs/config-database.md).
+
+## Fork Overview
+
+This chart is a **production-optimized fork** of `bitnami/keycloak` (originally v25.3.2), updated to Keycloak **v26.5.5** with significant architectural improvements.
+
+### This Fork are Designed for:
+- 🚀 **Remove bitnami dependency**
+- ☁️ **Cloud-native production** deployments
+- 📈 **High-scale, multi-cluster** environments
+- 🌍 **Multi-datacenter/multi-region** architectures
+- 📊 **Advanced observability** requirements (ELK, Loki, OTel)
+- 🔒 **Zero-trust, stateless** security models
+- 🚀 **Kubernetes-native** best practices (no PVCs, external state)
+
+### Key Differences from Bitnami Chart
+
+| Feature | Bitnami Chart | This Fork |
+|---------|---------------|-----------|
+| **Database** | Bundled PostgreSQL subchart | **External database required** (production-ready) |
+| **Keycloak Image** | `docker.io/bitnami/keycloak:26.3.3-debian-12-r0` | `quay.io/keycloak/keycloak:26.5.5` (official) |
+| **Dependencies** | `bitnami/common` + `bitnami/postgresql` | **Zero chart dependencies** (self-contained) |
+| **Deployment Modes** | StatefulSet only | **StatefulSet + Deployment** |
+| **Cache Scenarios** | Internal cache only | **4 deployment scenarios** (internal, clusterless, persistent, multisite) |
+| **External Infinispan** | Basic support | **Full integration** with clusterless mode |
+| **Traffic Exposure** | Ingress only | **Ingress + Gateway API (HTTPRoute)** |
+| **Logging** | JSON support | **JSON + ECS format + OpenTelemetry** |
+| **Observability** | Basic metrics | **Production logging stack** (Fluent Bit, Vector, OTel) |
+
+### Major Enhancements
+
+✅ **Production-Grade Database Configuration**
+- Removed internal PostgreSQL dependency for production readiness
+- Simplified database configuration with flat `db*` parameters
+- Mandatory external database (PostgreSQL required)
+
+✅ **Advanced Deployment Scenarios**
+- **Scenario 1**: Default StatefulSet with internal cache
+- **Scenario 2**: Clusterless mode (fully stateless, maximum scalability)
+- **Scenario 3**: Persistent user sessions (external Infinispan)
+- **Scenario 4**: Multisite deployment (global session sharing)
+
+✅ **Enhanced Logging & Observability**
+- JSON logging with ECS (Elastic Common Schema) transformation
+- OpenTelemetry logs support (Keycloak 24+)
+- Integration guides for: Fluent Bit, Vector, OpenTelemetry Collector
+- Kafka-based log pipeline architecture
+- ELK stack integration with ECS mapping
+
+✅ **Stateless Architecture**
+- All state in external database + Infinispan (scenarios 2-4)
+- `emptyDir` volumes for local cache and temporary files
+- Clusterless mode for fully stateless deployments
+- Perfect for cloud-native, autoscaling deployments
+
+✅ **Simplified Configuration**
+- Removed `bitnami/common` dependency complexity
+- Cleaner values.yaml structure
+- Direct parameter naming (no `externalDatabase.*` nesting)
+
+### Breaking Changes from Bitnami
+
+⚠️ **Migration Required**: This chart is **NOT** a drop-in replacement for the Bitnami chart.
+
+**Database Parameters Renamed:**
+
+| Bitnami Parameter | This Fork | Example |
+|-------------------|-----------|---------|
+| `postgresql.enabled=false` | _(removed)_ | Not applicable |
+| `externalDatabase.host` | `dbHost` | `postgres.example.com` |
+| `externalDatabase.port` | `dbPort` | `5432` |
+| `externalDatabase.database` | `dbDatabase` | `keycloak` |
+| `externalDatabase.user` | `dbUser` | `keycloak` |
+| `externalDatabase.password` | `dbPassword` | `secret` |
+| `externalDatabase.schema` | `dbSchema` | `public` |
+| `externalDatabase.extraParams` | `dbExtraParams` | `sslmode=require` |
+| `externalDatabase.existingSecret` | `dbExistingSecret` | `db-credentials` |
+
+**Other Breaking Changes:**
+- **`postgresql.*` removed**: Internal PostgreSQL subchart eliminated - external database is mandatory
+- **`image.pullSecrets`**: Moved to top-level `imagePullSecrets`
+- **`global.*` parameters**: Removed - use `image.registry` directly for private registries
+- **`global.security.allowInsecureImages`**: Parameter exists but **not functional** (leftover from Bitnami)
+
+## Architecture
+
+The following diagram illustrates the components and interactions within this Helm chart:
+
+```mermaid
+graph TD
+    User((User)) --> Traffic[Traffic Exposure]
+    Traffic --> Service[Keycloak Service]
+    
+    subgraph "Traffic Exposure"
+        Ingress[Ingress]
+        Gateway[Gateway API - HTTPRoute]
+    end
+    
+    Service --> Pods[Keycloak Pods - StatefulSet]
+    
+    subgraph "Keycloak Pod"
+        KC[Keycloak Container]
+        Init[Init Container: prepare-write-dirs]
+        Sidecars[Sidecars]
+    end
+    
+    Pods -.-> KC
+    Init -.-> KC
+    
+    KC -- TCP/UDP --> Headless[Headless Service - JGroups Discovery]
+    Headless <--> Pods
+    
+    KC -- JDBC --> DB[(External Database - PostgreSQL/MSSQL)]
+    
+    KC -- HotRod --> ISPN[(Optional External Infinispan)]
+    
+    Config[ConfigMap / Secrets] --> KC
+    
+    Prometheus[Prometheus Operator] --> ServiceMonitor[ServiceMonitor]
+    ServiceMonitor --> MetricsService[Metrics Service]
+    MetricsService --> Pods
+    
+    HPA[HPA/VPA] --> Pods
+    
+    ConfigCLI[Keycloak Config CLI - Job] -- Admin API --> Pods
+```
+
+## Troubleshooting & Upgrading
+
+### Troubleshooting
+
+Find more information about how to deal with common errors related to Helm charts in the [Helm documentation](https://helm.sh/docs/).
+
+### Upgrading Keycloak
+
+Before upgrading the Keycloak version, always consult the [official Keycloak migration guide](https://www.keycloak.org/docs/latest/upgrading/index.html) for breaking changes specific to that version.
 
 ## License
 
-Copyright &copy; 2026 Broadcom. The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+Copyright 2020-2026 Broadcom, Inc. All Rights Reserved.
+
+Copyright &copy; 2026 Mathieu CARBONNEAUX.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

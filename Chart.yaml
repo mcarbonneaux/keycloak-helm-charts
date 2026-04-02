@@ -1,0 +1,28 @@
+# Copyright 2020-2026 Broadcom, Inc. All Rights Reserved.
+# Copyright 2026 Mathieu CARBONNEAUX
+# SPDX-License-Identifier: APACHE-2.0
+
+annotations:
+  images: |
+    - name: keycloak
+      image: quay.io/keycloak/keycloak:26.5.5
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: 26.5.5
+description: Keycloak is a high performance Java-based identity and access management solution. It lets developers add an authentication layer to their applications with minimum effort.
+home: https://www.keycloak.org
+icon: https://raw.githubusercontent.com/keycloak/keycloak-admin-ui/main/apps/admin-ui/public/logo.svg
+keywords:
+  - keycloak
+  - identity
+  - access management
+  - sso
+  - oauth2
+  - openid-connect
+maintainers:
+  - name: keycloak
+    url: https://github.com/keycloak/keycloak
+name: keycloak
+sources:
+  - https://github.com/keycloak/keycloak
+version: 2.0.0

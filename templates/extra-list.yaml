@@ -1,0 +1,10 @@
+{{- /*
+Copyright 2020-2026 Broadcom, Inc. All Rights Reserved.
+Copyright 2026 Mathieu CARBONNEAUX
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- range .Values.extraDeploy }}
+---
+{{ include "common.tplvalues.render" (dict "value" . "context" $) }}
+{{- end }}

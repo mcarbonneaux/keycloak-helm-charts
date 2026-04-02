@@ -1,0 +1,160 @@
+{{- /*
+Copyright 2026 Mathieu CARBONNEAUX
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+{{- if and (eq (include "keycloak.replicaKind" .) "Deployment") .Values.cache.remote.host (not .Values.cache.configFile) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-full-remote-cache" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" (dict "customLabels" .Values.commonLabels "context" .) | nindent 4 }}
+    app.kubernetes.io/component: keycloak
+    app.kubernetes.io/part-of: keycloak
+data:
+  cache-ispn-full-remote.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <infinispan
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:infinispan:config:15.0 https://infinispan.org/schemas/infinispan-config-15.0.xsd"
+        xmlns="urn:infinispan:config:15.0">
+
+        <cache-container name="keycloak">
+            <transport lock-timeout="60000"/>
+
+            <distributed-cache name="sessions" owners="1">
+                <persistence>
+                    <remote-store xmlns="urn:infinispan:config:store:remote:15.0"
+                                  socket-timeout="60000"
+                                  tcp-no-delay="true"
+                                  fetch-state="false"
+                                  protocol-version="3.1">
+                        <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT:11222}"/>
+                        <security>
+                            <authentication>
+                                <digest username="${env.KC_CACHE_REMOTE_USERNAME}"
+                                        password="${env.KC_CACHE_REMOTE_PASSWORD}"
+                                        realm="default"
+                                        server-name="infinispan"/>
+                            </authentication>
+                        </security>
+                    </remote-store>
+                </persistence>
+            </distributed-cache>
+
+            <distributed-cache name="authenticationSessions" owners="1">
+                <persistence>
+                    <remote-store xmlns="urn:infinispan:config:store:remote:15.0"
+                                  socket-timeout="60000"
+                                  tcp-no-delay="true"
+                                  fetch-state="false"
+                                  protocol-version="3.1">
+                        <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT:11222}"/>
+                        <security>
+                            <authentication>
+                                <digest username="${env.KC_CACHE_REMOTE_USERNAME}"
+                                        password="${env.KC_CACHE_REMOTE_PASSWORD}"
+                                        realm="default"
+                                        server-name="infinispan"/>
+                            </authentication>
+                        </security>
+                    </remote-store>
+                </persistence>
+            </distributed-cache>
+
+            <distributed-cache name="offlineSessions" owners="1">
+                <persistence>
+                    <remote-store xmlns="urn:infinispan:config:store:remote:15.0"
+                                  socket-timeout="60000"
+                                  tcp-no-delay="true"
+                                  fetch-state="false"
+                                  protocol-version="3.1">
+                        <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT:11222}"/>
+                        <security>
+                            <authentication>
+                                <digest username="${env.KC_CACHE_REMOTE_USERNAME}"
+                                        password="${env.KC_CACHE_REMOTE_PASSWORD}"
+                                        realm="default"
+                                        server-name="infinispan"/>
+                            </authentication>
+                        </security>
+                    </remote-store>
+                </persistence>
+            </distributed-cache>
+
+            <distributed-cache name="clientSessions" owners="1">
+                <persistence>
+                    <remote-store xmlns="urn:infinispan:config:store:remote:15.0"
+                                  socket-timeout="60000"
+                                  tcp-no-delay="true"
+                                  fetch-state="false"
+                                  protocol-version="3.1">
+                        <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT:11222}"/>
+                        <security>
+                            <authentication>
+                                <digest username="${env.KC_CACHE_REMOTE_USERNAME}"
+                                        password="${env.KC_CACHE_REMOTE_PASSWORD}"
+                                        realm="default"
+                                        server-name="infinispan"/>
+                            </authentication>
+                        </security>
+                    </remote-store>
+                </persistence>
+            </distributed-cache>
+
+            <distributed-cache name="offlineClientSessions" owners="1">
+                <persistence>
+                    <remote-store xmlns="urn:infinispan:config:store:remote:15.0"
+                                  socket-timeout="60000"
+                                  tcp-no-delay="true"
+                                  fetch-state="false"
+                                  protocol-version="3.1">
+                        <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT:11222}"/>
+                        <security>
+                            <authentication>
+                                <digest username="${env.KC_CACHE_REMOTE_USERNAME}"
+                                        password="${env.KC_CACHE_REMOTE_PASSWORD}"
+                                        realm="default"
+                                        server-name="infinispan"/>
+                            </authentication>
+                        </security>
+                    </remote-store>
+                </persistence>
+            </distributed-cache>
+
+            <distributed-cache name="loginFailures" owners="1">
+                <persistence>
+                    <remote-store xmlns="urn:infinispan:config:store:remote:15.0"
+                                  socket-timeout="60000"
+                                  tcp-no-delay="true"
+                                  fetch-state="false"
+                                  protocol-version="3.1">
+                        <remote-server host="${env.KC_CACHE_REMOTE_HOST}" port="${env.KC_CACHE_REMOTE_PORT:11222}"/>
+                        <security>
+                            <authentication>
+                                <digest username="${env.KC_CACHE_REMOTE_USERNAME}"
+                                        password="${env.KC_CACHE_REMOTE_PASSWORD}"
+                                        realm="default"
+                                        server-name="infinispan"/>
+                            </authentication>
+                        </security>
+                    </remote-store>
+                </persistence>
+            </distributed-cache>
+
+            <replicated-cache name="realms">
+                <memory max-count="10000"/>
+            </replicated-cache>
+            <replicated-cache name="users">
+                <memory max-count="10000"/>
+            </replicated-cache>
+            <replicated-cache name="authorization">
+                <memory max-count="10000"/>
+            </replicated-cache>
+            <replicated-cache name="keys">
+                <memory max-count="1000"/>
+            </replicated-cache>
+
+        </cache-container>
+    </infinispan>
+{{- end -}}
